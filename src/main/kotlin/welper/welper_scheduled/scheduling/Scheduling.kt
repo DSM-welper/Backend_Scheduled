@@ -20,19 +20,42 @@ class Scheduling(
         private val openAPIFieldRepository: OpenAPIFieldRepository,
 ) {
 
-    @Scheduled(fixedRate = 10000000)
+    @Scheduled(fixedRate = 18000000)
     fun createServList() {
         val list: MutableList<Document> = mutableListOf()
         val docList: MutableList<Document> = categoryURL(1, list)
-        val lifeArray:List<String>  = listOf("infants","child","teenAge","youth","middleAge","oldAge")
-        for(i in 0..5){
-            val lifeArrayList: MutableList<Document> = getLifeArray(1, list, lifeArray[i])
-            getCategory(lifeArrayList,"lifeArray", lifeArray[i])
+        val lifeArray: List<String> = listOf("infants", "child", "teenAge", "youth", "middleAge", "oldAge")
+        val charTrgterArray: List<String> = listOf("doNot", "women", "pregnant", "disorder", "nationalMerit", "unemployed")
+        val trgterIndvdlArray: List<String> = listOf("doNot", "singleparents", "multiculture", "grandchildren", "settermin", "childHead", "soloOld")
+        val desireArray: List<String> = listOf("safety", "health", "dailylife", "family", "social", "economic", "education", "employment", "life", "Law")
+        for (i in 0..5) {
+            val lifeArrayList: MutableList<Document> = getLifeArray(1, list, "00${i + 1}")
+            getCategory(lifeArrayList, "lifeArray", lifeArray[i])
         }
+        for (i in 0..5) {
+            val charTrgterArrayList: MutableList<Document> = getCharTrgterArray(1, list, "00${i + 1}")
+            getCategory(charTrgterArrayList, "charTrgterArray", charTrgterArray[i])
+        }
+        for (i in 0..6) {
+            val trgterIndvdlArrayList: MutableList<Document> = getTrgterIndvdlArray(1, list, "00${i + 1}")
+            getCategory(trgterIndvdlArrayList, "trgterIndvdlArray", trgterIndvdlArray[i])
+        }
+        for (i in 0..9) {
+            val desireArrayList: MutableList<Document> = getDesireArray(1, list, "${i}000000")
+            getCategory(desireArrayList, "desireArray", desireArray[i])
+        }
+        val obstAbtArray10: MutableList<Document> = getObstAbtArray(1, list, "10")
+        val obstAbtArray20: MutableList<Document> = getObstAbtArray(1, list, "20")
+        val desireArrayExcept: MutableList<Document> = getDesireArray(1, list, "A000000")
+        getCategory(obstAbtArray10, "obstAbtArray", "severe")
+        getCategory(obstAbtArray20, "obstAbtArray", "weak")
+        getCategory(desireArrayExcept, "desireArray", "except")
+
         getAllCategory(docList)
     }
 
     private fun getAllCategory(docList: MutableList<Document>) {
+        println("모두 저장")
         docList.forEach {
             val nList: NodeList = it.getElementsByTagName("servList");
 
@@ -59,6 +82,7 @@ class Scheduling(
 
     private fun getCategory(docList: MutableList<Document>, fieldName: String, fieldContent: String) {
         docList.forEach {
+            println("필드 저장")
             val nList: NodeList = it.getElementsByTagName("servList");
 
             for (i in 0 until nList.length) {
@@ -88,8 +112,9 @@ class Scheduling(
             num: Int,
             list: MutableList<Document>,
     )
+
             : MutableList<Document> {
-        println("시작$num")
+        println("모두읽어오기")
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
@@ -115,6 +140,8 @@ class Scheduling(
             lifeArray: String,
     )
             : MutableList<Document> {
+        println("getlife 읽어오기")
+
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
@@ -139,6 +166,8 @@ class Scheduling(
             charTrgterArray: String,
     )
             : MutableList<Document> {
+        println("getCharTrgter 읽어오기")
+
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
@@ -163,12 +192,15 @@ class Scheduling(
             obstAbtArray: String,
     )
             : MutableList<Document> {
+        println("getObstAbt 읽어오기")
+
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
                 "keTuCooJ8R9Ao5LERVj48XiH87g5hLr3teCu06S8KTfHxSwtGkz0nAS%2BYS8v35JrIJ%2FxYDe3%2BtshuX2%2B2EZg3w%3D%3D" +
                 "&callTp=L" +
                 "&pageNo=$num2" +
+                "&charTrgterArray=004" +
                 "&numOfRows=100&obstAbtArray=$obstAbtArray"
         val dbFactoty: DocumentBuilderFactory = DocumentBuilderFactory.newInstance();
         val dBuilder: DocumentBuilder = dbFactoty.newDocumentBuilder();
@@ -187,6 +219,8 @@ class Scheduling(
             trgterIndvdlArray: String,
     )
             : MutableList<Document> {
+        println("getTrgterIndvdl 읽어오기")
+
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
@@ -211,6 +245,7 @@ class Scheduling(
             desireArray: String,
     )
             : MutableList<Document> {
+        println("getDesire 읽어오기")
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
