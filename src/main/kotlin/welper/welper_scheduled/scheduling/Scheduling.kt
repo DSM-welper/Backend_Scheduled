@@ -25,12 +25,12 @@ class Scheduling(
 
     @Scheduled(fixedRate = 18000000)
     fun createServList() {
-        val list: MutableList<Document> = mutableListOf()
+        var list: MutableList<Document> = mutableListOf()
         val docList: MutableList<Document> = readPost(1, list)
         saveAllCategory(docList)
 
         Category.values().forEach {
-            println(it.value)
+            list = mutableListOf()
             val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
             saveCategory(lifeArrayList, it.value)
         }
@@ -64,19 +64,22 @@ class Scheduling(
     }
 
     private fun saveCategory(docList: MutableList<Document>, categoryName: String) {
+
         docList.forEach {
             val nList: NodeList = it.getElementsByTagName("servList");
+            println(nList.length)
             for (i in 0 until nList.length) {
                 val nNode: Node = nList.item(i)
                 val eElement = nNode as Element
                 val id: String = getTagValue("servId", eElement)
                 val openApiPost: OpenApiPost = openApiPostRepository.findByIdOrNull(id) ?: throw Exception()
-                openApiCategoryRepository.save(
-                        OpenApICategory(
-                                categoryName = categoryName,
-                                openApiPost = openApiPost
-                        )
-                )
+                if (!openApiCategoryRepository.existsByCategoryNameAndOpenApiPost(categoryName, openApiPost))
+                    openApiCategoryRepository.save(
+                            OpenApICategory(
+                                    categoryName = categoryName,
+                                    openApiPost = openApiPost
+                            )
+                    )
             }
         }
     }
@@ -97,35 +100,37 @@ class Scheduling(
         val dBuilder: DocumentBuilder = dbFactoty.newDocumentBuilder();
         val doc: Document = dBuilder.parse(urlstr)
         println(doc.getElementsByTagName("servList").length)
-        list.add(doc)
         if (doc.getElementsByTagName("servList").length == 100) {
             num2++
             readPost(num2, list)
         }
+        list.add(doc)
         return list
     }
 
     private fun readCategory(
             num: Int,
             list: MutableList<Document>,
-            lifeArray: String,
+            categoryName: String,
     ): MutableList<Document> {
         println("category 읽어오기")
         var num2 = num
+        println(num2)
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
                 "keTuCooJ8R9Ao5LERVj48XiH87g5hLr3teCu06S8KTfHxSwtGkz0nAS%2BYS8v35JrIJ%2FxYDe3%2BtshuX2%2B2EZg3w%3D%3D" +
                 "&callTp=L" +
                 "&pageNo=$num2" +
-                "&numOfRows=100$lifeArray"
+                "&numOfRows=100$categoryName"
         val dbFactoty: DocumentBuilderFactory = DocumentBuilderFactory.newInstance();
         val dBuilder: DocumentBuilder = dbFactoty.newDocumentBuilder();
         val doc: Document = dBuilder.parse(urlstr)
-        list.add(doc)
         if (doc.getElementsByTagName("servList").length == 100) {
             num2++
-            readCategory(num2, list, lifeArray)
+            readCategory(num2, list, categoryName)
         }
+        list.add(doc)
+
         return list
     }
 
