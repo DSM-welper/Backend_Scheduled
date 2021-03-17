@@ -34,7 +34,6 @@ class Scheduling(
             val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
             saveCategory(lifeArrayList, it.value)
         }
-
     }
 
     private fun saveAllCategory(docList: MutableList<Document>) {
