@@ -30,6 +30,7 @@ class Scheduling(
         saveAllCategory(docList)
 
         Category.values().forEach {
+            println(it.value)
             list = mutableListOf()
             val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
             saveCategory(lifeArrayList, it.value)
