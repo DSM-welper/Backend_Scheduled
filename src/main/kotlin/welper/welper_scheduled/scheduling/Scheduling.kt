@@ -13,7 +13,6 @@ import welper.welper_scheduled.domain.OpenApiPost
 
 import welper.welper_scheduled.repository.OpenApiCategoryRepository
 
-//import welper.welper_scheduled.repository.LifeArrayRepository
 import welper.welper_scheduled.repository.OpenApiPostRepository
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
@@ -50,7 +49,7 @@ class Scheduling(
                 if (!openApiPostRepository.existsById(id)) {
                     openApiPostRepository.save(
                             OpenApiPost(
-                                    inqNUm = getTagValue("inqNum", eElement),
+                                    inqNum = getTagValue("inqNum", eElement),
                                     jurOrgNm = getTagValue("jurOrgNm", eElement),
                                     servDgst = getTagValue("servDgst", eElement),
                                     servDtlLink = getTagValue("servDtlLink", eElement),
@@ -83,19 +82,10 @@ class Scheduling(
         }
     }
 
-
-    private fun getTagValue(tag: String, eElement: Element): String {
-        val nlList: NodeList = eElement.getElementsByTagName(tag).item(0).childNodes ?: return "a"
-        val nValue: Node = nlList.item(0) ?: return "a"
-        return nValue.nodeValue
-    }
-
     private fun readPost(
             num: Int,
             list: MutableList<Document>,
-    )
-
-            : MutableList<Document> {
+    ): MutableList<Document> {
         println("모두읽어오기")
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
@@ -120,10 +110,8 @@ class Scheduling(
             num: Int,
             list: MutableList<Document>,
             lifeArray: String,
-    )
-            : MutableList<Document> {
+    ): MutableList<Document> {
         println("category 읽어오기")
-
         var num2 = num
         val urlstr = "http://www.bokjiro.go.kr/openapi/rest/gvmtWelSvc" +
                 "?crtiKey=" +
@@ -140,5 +128,11 @@ class Scheduling(
             readCategory(num2, list, lifeArray)
         }
         return list
+    }
+
+    private fun getTagValue(tag: String, eElement: Element): String {
+        val nlList: NodeList = eElement.getElementsByTagName(tag).item(0).childNodes ?: return "a"
+        val nValue: Node = nlList.item(0) ?: return "a"
+        return nValue.nodeValue
     }
 }

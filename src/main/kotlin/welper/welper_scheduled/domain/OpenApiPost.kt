@@ -4,19 +4,14 @@ import javax.persistence.*
 
 @Entity
 
-class OpenApiPost       (
+class OpenApiPost(
         @Id
-//        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val servId: String?,
-        val inqNUm: String?,
-        val jurMnofNm: String?,
-        val jurOrgNm: String?,
-        val servDgst: String?,
-        val servDtlLink: String?,
-        val servNm: String?,
-        val svcfrstRegTs: String?,
-//        @OneToMany(fetch = FetchType.LAZY)
-//        @JoinColumn(name = "api_post_id")
-//        val openApiContent: String,
-
-        )
+        val servId: String?, //서비스ID
+        val servNm: String?, //서비스명
+        val inqNum: String?, //조회수
+        val jurMnofNm: String?, //소관부처명
+        val jurOrgNm: String?, //소관조직명
+        val servDgst: String?, //서비스 요약
+        val servDtlLink: String?, //서비스 상세 링크
+        val svcfrstRegTs: String?,//서비스 등록일
+)
