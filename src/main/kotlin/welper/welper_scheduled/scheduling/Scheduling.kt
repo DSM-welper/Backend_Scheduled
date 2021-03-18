@@ -1,5 +1,8 @@
 package welper.welper_scheduled.scheduling
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -22,6 +25,7 @@ class Scheduling(
         private val openApiCategoryRepository: OpenApiCategoryRepository,
         private val openApiPostRepository: OpenApiPostRepository,
 ) {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     @Scheduled(fixedRate = 18000000)
     fun createServList() {
@@ -30,10 +34,12 @@ class Scheduling(
         saveAllCategory(docList)
 
         Category.values().forEach {
-            println(it.value)
-            list = mutableListOf()
-            val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
-            saveCategory(lifeArrayList, it.value)
+            coroutineScope.launch {
+                println(it.value)
+                list = mutableListOf()
+                val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
+                saveCategory(lifeArrayList, it.value)
+            }
         }
     }
 
@@ -64,7 +70,7 @@ class Scheduling(
         }
     }
 
-    private fun saveCategory(docList: MutableList<Document>, categoryName: String) {
+    private suspend fun saveCategory(docList: MutableList<Document>, categoryName: String) {
 
         docList.forEach {
             val nList: NodeList = it.getElementsByTagName("servList");
@@ -109,7 +115,7 @@ class Scheduling(
         return list
     }
 
-    private fun readCategory(
+    private suspend fun readCategory(
             num: Int,
             list: MutableList<Document>,
             categoryName: String,
