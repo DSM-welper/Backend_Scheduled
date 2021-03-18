@@ -4,7 +4,7 @@ import welper.welper_scheduled.attribute.Category
 import javax.persistence.*
 
 @Entity
-@Table(name = "open_api_category4")
+@Table(name = "open_api_category")
 class OpenApICategory(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
