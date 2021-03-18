@@ -3,7 +3,7 @@ package welper.welper_scheduled.domain
 import javax.persistence.*
 
 @Entity
-
+@Table(name = "open_api_post")
 class OpenApiPost(
         @Id
         val servId: String?, //서비스ID
