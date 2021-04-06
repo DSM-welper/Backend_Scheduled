@@ -36,7 +36,7 @@ class Scheduling(
         var list: MutableList<Document> = mutableListOf()
         val docList: MutableList<Document> = readPost(1, list)
         saveAllCategory(docList)
-        limitCategory()
+//        limitCategory()
         Category.values().forEach {
             coroutineScope.launch {
                 println(it.value)
