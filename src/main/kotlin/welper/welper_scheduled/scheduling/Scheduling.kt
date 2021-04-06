@@ -11,8 +11,10 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import welper.welper_scheduled.attribute.Category
+import welper.welper_scheduled.domain.CopyApiPost
 import welper.welper_scheduled.domain.OpenApICategory
 import welper.welper_scheduled.domain.OpenApiPost
+import welper.welper_scheduled.repository.CopyApiPostRepository
 
 import welper.welper_scheduled.repository.OpenApiCategoryRepository
 
@@ -24,6 +26,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 class Scheduling(
         private val openApiCategoryRepository: OpenApiCategoryRepository,
         private val openApiPostRepository: OpenApiPostRepository,
+        private val copyApiPostRepository: CopyApiPostRepository,
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -45,14 +48,14 @@ class Scheduling(
 
     private fun saveAllCategory(docList: MutableList<Document>) {
         println("모두 저장")
-        docList.forEach {
-            val nList: NodeList = it.getElementsByTagName("servList")
+        copyApiPostRepository.deleteAll()
+        if (openApiPostRepository.count().toInt() == 0) {
+            docList.forEach {
+                val nList: NodeList = it.getElementsByTagName("servList")
 
-            for (i in 0 until nList.length) {
-                val nNode: Node = nList.item(i)
-                val eElement = nNode as Element
-                val id: String = getTagValue("servId", eElement)
-                if (!openApiPostRepository.existsById(id)) {
+                for (i in 0 until nList.length) {
+                    val nNode: Node = nList.item(i)
+                    val eElement = nNode as Element
                     openApiPostRepository.save(
                             OpenApiPost(
                                     inqNum = getTagValue("inqNum", eElement),
@@ -65,6 +68,49 @@ class Scheduling(
                                     jurMnofNm = getTagValue("jurMnofNm", eElement),
                             )
                     )
+                }
+            }
+        } else {
+            docList.forEach {
+                val nList: NodeList = it.getElementsByTagName("servList")
+                for (i in 0 until nList.length) {
+                    val nNode: Node = nList.item(i)
+                    val eElement = nNode as Element
+                    copyApiPostRepository.save(
+                            CopyApiPost(
+                                    inqNum = getTagValue("inqNum", eElement),
+                                    jurOrgNm = getTagValue("jurOrgNm", eElement),
+                                    servDgst = getTagValue("servDgst", eElement),
+                                    servDtlLink = getTagValue("servDtlLink", eElement),
+                                    servId = getTagValue("servId", eElement),
+                                    servNm = getTagValue("servNm", eElement),
+                                    svcfrstRegTs = getTagValue("svcfrstRegTs", eElement),
+                                    jurMnofNm = getTagValue("jurMnofNm", eElement),
+                            )
+                    )
+                    val onlyCopyList = openApiPostRepository.onlyComparisonCopyPost()
+
+                    onlyCopyList.forEach { it2 ->
+                        openApiPostRepository.save(
+                                OpenApiPost(
+                                        inqNum = it2.inqNum,
+                                        jurOrgNm = it2.jurOrgNm,
+                                        servDgst = it2.servDgst,
+                                        servDtlLink = it2.servDtlLink,
+                                        servId = it2.servId,
+                                        servNm = it2.servNm,
+                                        svcfrstRegTs = it2.svcfrstRegTs,
+                                        jurMnofNm = it2.jurMnofNm,
+                                )
+                        )
+                    }
+                    val onlyOriginList = openApiPostRepository.onlyComparisonApiPost()
+                    onlyOriginList.forEach { it2 ->
+                        if (it2.servId != null) {
+                            openApiCategoryRepository.deleteAllByOpenApiPost(it2)
+                            openApiPostRepository.deleteById(it2.servId)
+                        }
+                    }
                 }
             }
         }
