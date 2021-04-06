@@ -14,6 +14,7 @@ import welper.welper_scheduled.attribute.Category
 import welper.welper_scheduled.domain.CopyApiPost
 import welper.welper_scheduled.domain.OpenApICategory
 import welper.welper_scheduled.domain.OpenApiPost
+import welper.welper_scheduled.exception.PostNotFoundException
 import welper.welper_scheduled.repository.CopyApiPostRepository
 
 import welper.welper_scheduled.repository.OpenApiCategoryRepository
@@ -35,13 +36,28 @@ class Scheduling(
         var list: MutableList<Document> = mutableListOf()
         val docList: MutableList<Document> = readPost(1, list)
         saveAllCategory(docList)
-
+        limitCategory()
         Category.values().forEach {
             coroutineScope.launch {
                 println(it.value)
                 list = mutableListOf()
                 val lifeArrayList: MutableList<Document> = readCategory(1, list, it.code)
                 saveCategory(lifeArrayList, it.value)
+            }
+        }
+    }
+
+    private fun limitCategory() {
+        println("제한")
+        val list: List<OpenApiPost> = openApiPostRepository.findAll()
+        list.forEach {
+            if (it.servId != null) {
+                val num = it.servId.substring(8, 11)
+                println(num)
+                if (num.toInt() >= 465) {
+                    openApiCategoryRepository.deleteAllByOpenApiPost(it)
+                    openApiPostRepository.delete(it)
+                }
             }
         }
     }
@@ -125,14 +141,15 @@ class Scheduling(
                 val nNode: Node = nList.item(i)
                 val eElement = nNode as Element
                 val id: String = getTagValue("servId", eElement)
-                val openApiPost: OpenApiPost = openApiPostRepository.findByIdOrNull(id) ?: throw Exception()
-                if (!openApiCategoryRepository.existsByCategoryNameAndOpenApiPost(categoryName, openApiPost))
-                    openApiCategoryRepository.save(
-                            OpenApICategory(
-                                    categoryName = categoryName,
-                                    openApiPost = openApiPost
-                            )
-                    )
+                val openApiPost: OpenApiPost? = openApiPostRepository.findByIdOrNull(id)
+                if (openApiPost != null)
+                    if (!openApiCategoryRepository.existsByCategoryNameAndOpenApiPost(categoryName, openApiPost))
+                        openApiCategoryRepository.save(
+                                OpenApICategory(
+                                        categoryName = categoryName,
+                                        openApiPost = openApiPost
+                                )
+                        )
             }
         }
     }
