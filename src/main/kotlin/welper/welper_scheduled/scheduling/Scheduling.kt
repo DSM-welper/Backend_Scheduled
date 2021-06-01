@@ -125,7 +125,7 @@ class Scheduling(
                     val onlyOriginList = openApiPostRepository.onlyComparisonApiPost()
                     onlyOriginList.forEach { it2 ->
                         if (it2.servId != null) {
-                            bookMarkRepository.deleteAllOpenApiPost(it2)
+                            bookMarkRepository.deleteAllByOpenApiPost(it2)
                             openApiCategoryRepository.deleteAllByOpenApiPost(it2)
                             openApiPostRepository.deleteById(it2.servId)
                         }
