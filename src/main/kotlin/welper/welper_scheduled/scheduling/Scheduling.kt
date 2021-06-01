@@ -15,6 +15,7 @@ import welper.welper_scheduled.domain.CopyApiPost
 import welper.welper_scheduled.domain.OpenApICategory
 import welper.welper_scheduled.domain.OpenApiPost
 import welper.welper_scheduled.exception.PostNotFoundException
+import welper.welper_scheduled.repository.BookMarkRepository
 import welper.welper_scheduled.repository.CopyApiPostRepository
 
 import welper.welper_scheduled.repository.OpenApiCategoryRepository
@@ -28,6 +29,7 @@ class Scheduling(
         private val openApiCategoryRepository: OpenApiCategoryRepository,
         private val openApiPostRepository: OpenApiPostRepository,
         private val copyApiPostRepository: CopyApiPostRepository,
+        private val bookMarkRepository: BookMarkRepository,
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -123,6 +125,7 @@ class Scheduling(
                     val onlyOriginList = openApiPostRepository.onlyComparisonApiPost()
                     onlyOriginList.forEach { it2 ->
                         if (it2.servId != null) {
+                            bookMarkRepository.deleteAllOpenApiPost(it2)
                             openApiCategoryRepository.deleteAllByOpenApiPost(it2)
                             openApiPostRepository.deleteById(it2.servId)
                         }
