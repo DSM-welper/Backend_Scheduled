@@ -7,5 +7,5 @@ import welper.welper_scheduled.domain.OpenApiPost
 
 interface BookMarkRepository : JpaRepository<BookMark, Int> {
     @Transactional
-    fun deleteAllOpenApiPost(post: OpenApiPost)
+    fun deleteAllByOpenApiPost(post: OpenApiPost)
 }

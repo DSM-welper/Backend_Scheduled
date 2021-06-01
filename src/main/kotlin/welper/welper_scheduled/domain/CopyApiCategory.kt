@@ -1,6 +1,5 @@
 package welper.welper_scheduled.domain
 
-import welper.welper_scheduled.attribute.Category
 import javax.persistence.*
 
 @Entity
