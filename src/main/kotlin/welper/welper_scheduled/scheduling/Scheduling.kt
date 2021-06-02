@@ -122,6 +122,7 @@ class Scheduling(
                                 )
                         )
                     }
+                    
                     val onlyOriginList = openApiPostRepository.onlyComparisonApiPost()
                     onlyOriginList.forEach { it2 ->
                         if (it2.servId != null) {
